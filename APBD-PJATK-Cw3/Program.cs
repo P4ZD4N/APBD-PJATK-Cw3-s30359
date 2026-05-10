@@ -1,6 +1,8 @@
+using System.Text.Json.Serialization;
 using APBD_PJATK_Cw3.Mappers;
 using APBD_PJATK_Cw3.Services;
 using APBD_PJATK_Cw3.Utils;
+using APBD_PJATK_Cw3.Validators;
 
 namespace APBD_PJATK_Cw3;
 
@@ -14,9 +16,17 @@ public class Program
         
         builder.Services.AddScoped<IRoomsService, RoomsService>();
         builder.Services.AddScoped<IRoomsMapper, RoomsMapper>();
+        builder.Services.AddScoped<IReservationsService, ReservationsService>();
+        builder.Services.AddScoped<IReservationsMapper, ReservationsMapper>();
+        builder.Services.AddScoped<IReservationsValidator, ReservationsValidator>();
         builder.Services.AddAuthorization();
         builder.Services.AddOpenApi();
         builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
         var app = builder.Build();
 

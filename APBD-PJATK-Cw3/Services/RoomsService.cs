@@ -19,9 +19,9 @@ public class RoomsService(IRoomsMapper roomsMapper) : IRoomsService
             .ToList();
     }
 
-    public RoomResponse GetRoom(int id)
+    public RoomResponse GetRoom(long id)
     {
-        return roomsMapper.MapRoomToResponse(FindAndGetRoom(id));
+        return roomsMapper.MapRoomToResponse(Room.FindAndGetRoom(id));
     }
 
     public List<RoomResponse> GetByBuildingCode(string buildingCode)
@@ -35,7 +35,6 @@ public class RoomsService(IRoomsMapper roomsMapper) : IRoomsService
     public RoomResponse AddRoom(AddRoomRequest request)
     {
         var room = new Room(
-            ExampleDataUtil.Rooms.Max(r => r.Id) + 1, 
             request.Name, 
             request.BuildingCode,
             request.Floor, 
@@ -48,9 +47,9 @@ public class RoomsService(IRoomsMapper roomsMapper) : IRoomsService
         return roomsMapper.MapRoomToResponse(room);
     }
 
-    public RoomResponse UpdateRoom(UpdateRoomRequest request, int id)
+    public RoomResponse UpdateRoom(UpdateRoomRequest request, long id)
     {
-        var room = FindAndGetRoom(id);
+        var room = Room.FindAndGetRoom(id);
         
         if (request.Name != null)
             room.Name = request.Name;
@@ -73,14 +72,15 @@ public class RoomsService(IRoomsMapper roomsMapper) : IRoomsService
         return roomsMapper.MapRoomToResponse(room);
     }
 
-    public void DeleteRoom(int id)
+    public void DeleteRoom(long id)
     {
-        ExampleDataUtil.Rooms.Remove(FindAndGetRoom(id));
-    }
+        var roomHasFutureReservations = ExampleDataUtil.Reservations.Any(r => r.RoomId == id);
 
-    private Room FindAndGetRoom(int id)
-    {
-        var room = ExampleDataUtil.Rooms.FirstOrDefault(r => r.Id == id);
-        return room ?? throw new KeyNotFoundException($"Room with ID {id} was not found in database!");
+        if (roomHasFutureReservations)
+        {
+            throw new InvalidOperationException("Can't delete rooms that have future reservations!");
+        }
+        
+        ExampleDataUtil.Rooms.Remove(Room.FindAndGetRoom(id));
     }
 }

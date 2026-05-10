@@ -15,8 +15,8 @@ public class RoomsController(IRoomsService roomsService) : ControllerBase
         return Ok(roomsService.GetRooms(minCapacity, hasProjector, isActive));
     }
 
-    [HttpGet("{id:int}")]
-    public ActionResult<RoomResponse> GetById(int id)
+    [HttpGet("{id:long}")]
+    public ActionResult<RoomResponse> GetById(long id)
     {
         try
         {
@@ -45,8 +45,8 @@ public class RoomsController(IRoomsService roomsService) : ControllerBase
         );
     }
     
-    [HttpPut("{id:int}")]
-    public ActionResult<RoomResponse> UpdateRoom(UpdateRoomRequest request, int id)
+    [HttpPut("{id:long}")]
+    public ActionResult<RoomResponse> UpdateRoom(UpdateRoomRequest request, long id)
     {
         try
         {
@@ -58,8 +58,8 @@ public class RoomsController(IRoomsService roomsService) : ControllerBase
         }
     }
     
-    [HttpDelete("{id:int}")]
-    public ActionResult DeleteRoom(int id)
+    [HttpDelete("{id:long}")]
+    public ActionResult DeleteRoom(long id)
     {
         try
         {
@@ -69,6 +69,10 @@ public class RoomsController(IRoomsService roomsService) : ControllerBase
         catch (KeyNotFoundException e)
         {
             return NotFound(new ErrorResponse(e.Message));
+        }
+        catch (InvalidOperationException e)
+        {
+            return Conflict(new ErrorResponse(e.Message));
         }
     }
 }
